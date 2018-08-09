@@ -6,17 +6,40 @@ import {
 import { attachmentFile } from "../../../arcgis-rest-feature-service/test/attachments.test";
 
 describe("encodeFormData", () => {
-  it("should encode in form data for multipart requests", () => {
+  it("should encode in form data for multipart file requests", () => {
     const binaryObj =
       typeof File !== "undefined"
         ? new File(["foo"], "foo.txt", {
             type: "text/plain"
           })
-        : new Buffer("");
+        : Buffer.from("");
 
     const formData = encodeFormData({ binary: binaryObj });
 
     expect(formData instanceof FormData).toBeTruthy();
+
+    if (formData instanceof FormData && formData.get) {
+      expect(formData.get("binary") instanceof File).toBeTruthy();
+      expect((formData.get("binary") as File).name).toBe("foo.txt");
+    }
+  });
+
+  it("should encode in form data for multipart blob requests", () => {
+    const binaryObj =
+      typeof Blob !== "undefined"
+        ? new Blob([], {
+            type: "text/plain"
+          })
+        : Buffer.from("");
+
+    const formData = encodeFormData({ binary: binaryObj });
+
+    expect(formData instanceof FormData).toBeTruthy();
+
+    if (formData instanceof FormData && formData.get) {
+      expect(formData.get("binary") instanceof File).toBeTruthy();
+      expect((formData.get("binary") as File).name).toBe("binary");
+    }
   });
 
   it("should encode as query string for basic types", () => {

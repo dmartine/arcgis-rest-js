@@ -15,9 +15,15 @@ export function encodeFormData(params: any): FormData | string {
   if (useFormData) {
     const formData = new FormData();
     Object.keys(newParams).forEach((key: any) => {
-      if (key === "file" && newParams[key].name) {
-        // Pass on the file's name if provided to override defaults such as "blob"
+      if (typeof File !== "undefined" && newParams[key] instanceof File) {
+        // Pass on the file's name to override defaults such as "blob"
         formData.append(key, newParams[key], newParams[key].name);
+      } else if (
+        typeof Blob !== "undefined" &&
+        newParams[key] instanceof Blob
+      ) {
+        // Pass on the key as the file name to override defaults such as "blob"
+        formData.append(key, newParams[key], key);
       } else {
         formData.append(key, newParams[key]);
       }
